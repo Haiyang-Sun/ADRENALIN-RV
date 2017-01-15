@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- WARNING: Eclipse auto-generated file.
+              Any modifications will be overwritten.
+              To include a user specific buildfile here, simply create one in the same
+              directory with the processing instruction <?eclipse.ant.import?>
+              as the first entry and export the buildfile again. --><project basedir="." default="build" name="AndroidAnalysis">
+    <property environment="env"/>
+    <property name="debuglevel" value="source,lines,vars"/>
+    <property name="target" value="1.7"/>
+    <property name="source" value="1.7"/>
+    <path id="AndroidAnalysis.classpath">
+        <pathelement location="output/build/rv"/>
+        <pathelement location="output/build/analysis"/>
+        <pathelement location="output/build/instr"/>
+        <pathelement location="lib/disl-server.jar"/>
+        <pathelement location="lib/asm-debug-all-5.0.3.jar"/>
+        <pathelement location="lib/core.jar"/>
+        <pathelement location="lib/framework.jar"/>
+    </path>
+    <target name="init">
+        <mkdir dir="output/build/rv"/>
+        <mkdir dir="output/build/analysis"/>
+        <mkdir dir="output/build/instr"/>
+        <mkdir dir="dexes"/>
+        <mkdir dir="adbfolder/recv/dex"/>
+        <mkdir dir="adbfolder/send/dex"/>
+        <mkdir dir="adbfolder/recv/table"/>
+        <mkdir dir="adbfolder/send/table"/>
+        <copy includeemptydirs="false" todir="output/build/rv">
+            <fileset dir="src-rv">
+                <exclude name="**/*.launch"/>
+                <exclude name="**/*.java"/>
+            </fileset>
+        </copy>
+        <copy includeemptydirs="false" todir="output/build/analysis">
+            <fileset dir="src-analysis">
+                <exclude name="**/*.launch"/>
+                <exclude name="**/*.java"/>
+            </fileset>
+        </copy>
+        <copy includeemptydirs="false" todir="output/build/instr">
+            <fileset dir="src-instr">
+                <exclude name="**/*.launch"/>
+                <exclude name="**/*.java"/>
+            </fileset>
+        </copy>
+    </target>
+    <target name="clean">
+        <delete dir="output"/>
+        <delete dir="dexes"/>
+        <delete dir="adbfolder"/>
+    </target>
+    <target depends="clean" name="cleanall"/>
+    <target depends="build-project,build-jar" name="build"/>
+    <target depends="init" name="build-project">
+        <echo message="${ant.project.name}: ${ant.file}"/>
+        <javac debug="true" debuglevel="${debuglevel}" destdir="output/build/rv" includeantruntime="false" source="${source}" target="${target}">
+            <src path="src-rv"/>
+            <classpath refid="AndroidAnalysis.classpath"/>
+        </javac>
+        <javac debug="true" debuglevel="${debuglevel}" destdir="output/build/analysis" includeantruntime="false" source="${source}" target="${target}">
+            <src path="src-analysis"/>
+            <classpath refid="AndroidAnalysis.classpath"/>
+        </javac>
+        <javac debug="true" debuglevel="${debuglevel}" destdir="output/build/instr" includeantruntime="false" source="${source}" target="${target}">
+            <src path="src-instr"/>
+            <classpath refid="AndroidAnalysis.classpath"/>
+        </javac>
+    </target>
+    <target name="build-jar" depends="build-project">
+        <jar destfile="output/lib/rv.jar" basedir="output/build/rv" />
+        <jar destfile="output/lib/analysis.jar" basedir="output/build/analysis" />
+        <jar destfile="output/lib/instr.jar" basedir="output/build/instr" />
+    </target>
+</project>
