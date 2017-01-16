@@ -14,7 +14,7 @@ public abstract class MonitorEvent {
         this.timestamp = System.nanoTime();
         this.tid = Runtime.getThreadId();
         this.pid = Runtime.getPid();
-        this.desc = desc+"("+dexName+","+pid+","+tid+")";
+        this.desc = desc;
         this.dexName = dexName;
     }
 
@@ -28,7 +28,7 @@ public abstract class MonitorEvent {
     }
     @Override
     public String toString(){
-    	return desc;
+    	return desc+"("+dexName+","+pid+","+tid+")";
     }
 	public boolean sameThread(MonitorEvent other) {
 		return this.tid == other.tid;

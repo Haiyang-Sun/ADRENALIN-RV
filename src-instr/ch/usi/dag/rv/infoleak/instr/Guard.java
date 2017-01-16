@@ -4,17 +4,6 @@ import ch.usi.dag.disl.annotation.GuardMethod;
 import ch.usi.dag.disl.staticcontext.DexStaticContext;
 
 public class Guard {
-    public static class ReflectionGuard{
-        @GuardMethod
-        public static boolean guard (final DexStaticContext msc) {
-            final String name = msc.getCallee ();
-            final boolean res = name.contains("java/lang/reflect/Constructor.newInstance");
-            if(res){
-            }else {
-            }
-            return res;
-        }
-    }
     public static class DeviceIdGuard{
         @GuardMethod
         public static boolean guard (final DexStaticContext msc) {

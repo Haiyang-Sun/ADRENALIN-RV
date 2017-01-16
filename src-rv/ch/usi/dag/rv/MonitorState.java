@@ -2,6 +2,7 @@ package ch.usi.dag.rv;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -10,14 +11,32 @@ import ch.usi.dag.rv.utils.Runtime;
 
 public abstract class MonitorState {
 	HashMap<Long, ThreadEventQueue> threadEventQueues = new HashMap<Long, MonitorState.ThreadEventQueue>();
-	List<MonitorEventProcessor> processings = new ArrayList<MonitorEventProcessor>();
-	List<MonitorEvent> globalEvents = new ArrayList<MonitorEvent>();
+	List<MonitorEventProcessor> processings = new LinkedList<MonitorEventProcessor>();
+	List<MonitorEvent> globalEvents = new LinkedList<MonitorEvent>();
+	int noneProcessableCount = 0;
 	class ThreadEventQueue {
 		public ThreadEventQueue(){
 			this.eventList.addAll(globalEvents);
 		}
 		public void addEvent(MonitorEvent e) {
+			if(!e.needProcess()){
+				noneProcessableCount++;
+			}
+			if(noneProcessableCount > 10000) {
+				cleanEventList();
+			}
 			this.eventList.add(e);
+		}
+		
+		private void cleanEventList(){
+			Iterator<MonitorEvent> iter = this.eventList.iterator();
+			while(iter.hasNext()){
+				MonitorEvent event = iter.next();
+				if(!event.needProcess()){
+					iter.remove();
+				}
+			}
+			noneProcessableCount = 0;
 		}
 
 		public void process(List<MonitorEventProcessor> processings) {
