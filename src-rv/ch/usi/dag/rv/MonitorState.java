@@ -13,39 +13,6 @@ public abstract class MonitorState {
 	HashMap<Long, ThreadEventQueue> threadEventQueues = new HashMap<Long, MonitorState.ThreadEventQueue>();
 	List<MonitorEventProcessor> processings = new LinkedList<MonitorEventProcessor>();
 	List<MonitorEvent> globalEvents = new LinkedList<MonitorEvent>();
-	int noneProcessableCount = 0;
-	class ThreadEventQueue {
-		public ThreadEventQueue(){
-			this.eventList.addAll(globalEvents);
-		}
-		public void addEvent(MonitorEvent e) {
-			if(!e.needProcess()){
-				noneProcessableCount++;
-			}
-			if(noneProcessableCount > 10000) {
-				cleanEventList();
-			}
-			this.eventList.add(e);
-		}
-		
-		private void cleanEventList(){
-			Iterator<MonitorEvent> iter = this.eventList.iterator();
-			while(iter.hasNext()){
-				MonitorEvent event = iter.next();
-				if(!event.needProcess()){
-					iter.remove();
-				}
-			}
-			noneProcessableCount = 0;
-		}
-
-		public void process(List<MonitorEventProcessor> processings) {
-			for (final MonitorEventProcessor p : processings) {
-				p.process(this.eventList);
-			}
-		}
-		List<MonitorEvent> eventList = new ArrayList<MonitorEvent>();
-	}
 
 	public synchronized void addProcessing(
 			final MonitorEventProcessor processing) {
@@ -70,6 +37,38 @@ public abstract class MonitorState {
 					eventQ.process(processings);
 				}
 			}
+		}
+	}
+	
+	class ThreadEventQueue {
+		int noneProcessableCount = 0;
+		List<MonitorEvent> eventList = new ArrayList<MonitorEvent>();
+		public ThreadEventQueue(){
+			this.eventList.addAll(globalEvents);
+		}
+		public void addEvent(MonitorEvent e) {
+			if(!e.needProcess()){
+				noneProcessableCount++;
+			}
+			if(noneProcessableCount > 10000) {
+				cleanEventList();
+			}
+			this.eventList.add(e);
+		}
+		public void process(List<MonitorEventProcessor> processings) {
+			for (final MonitorEventProcessor p : processings) {
+				p.process(this.eventList);
+			}
+		}
+		private void cleanEventList(){
+			Iterator<MonitorEvent> iter = this.eventList.iterator();
+			while(iter.hasNext()){
+				MonitorEvent event = iter.next();
+				if(!event.needProcess()){
+					iter.remove();
+				}
+			}
+			noneProcessableCount = 0;
 		}
 	}
 }

@@ -1,5 +1,6 @@
 package ch.usi.dag.rv.infoleak;
 
+import ch.usi.dag.rv.MonitorEvent;
 import ch.usi.dag.rv.MonitorState;
 
 public class DataLeakMonitorState extends MonitorState{
@@ -10,5 +11,8 @@ public class DataLeakMonitorState extends MonitorState{
             instance.addProcessing (new DataLeakEventProcessing());
         }
         return instance;
+    }
+    public static void addEvent(MonitorEvent e){
+    	getInstance().newEvent(e);
     }
 }

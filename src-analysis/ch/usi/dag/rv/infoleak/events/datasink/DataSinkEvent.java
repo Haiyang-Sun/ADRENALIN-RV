@@ -9,7 +9,7 @@ public abstract class DataSinkEvent extends MonitorEvent{
     byte[] content;
 
     public DataSinkEvent(String dexName, final String desc, final byte[] value, final int off, final int length){
-        super(dexName, "DataSinkEvent-"+desc, true);
+        super(dexName, desc, true);
         if(value == null){
             content = new byte[0];
             return;

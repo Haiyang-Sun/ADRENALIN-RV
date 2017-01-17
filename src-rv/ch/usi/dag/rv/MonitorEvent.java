@@ -28,7 +28,7 @@ public abstract class MonitorEvent {
     }
     @Override
     public String toString(){
-    	return desc+"("+dexName+","+pid+","+tid+")";
+    	return desc+"("+dexName+")";
     }
 	public boolean sameThread(MonitorEvent other) {
 		return this.tid == other.tid;

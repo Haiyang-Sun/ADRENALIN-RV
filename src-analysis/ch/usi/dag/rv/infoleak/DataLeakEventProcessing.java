@@ -29,6 +29,7 @@ public class DataLeakEventProcessing implements MonitorEventProcessor{
         if(lastEvent instanceof DataSinkEvent){
             final DataSinkEvent sink = (DataSinkEvent)lastEvent;
             for(final DataSourceEvent source : sources){
+            	//compare the value sent at the sink with the value retrieved from the source
                 if(sink.matches(source)){
                 	validSources.add(source);
                 }

@@ -30,15 +30,16 @@ public class DataLeakViolation extends MonitorViolation{
 		}
 		if(strictSource.endsWith("+")) {
 			strictSource = strictSource.substring(0, strictSource.length()-1);
-			DefaultLog.v("DataLeakViolation-"+id, strictSource+" has leaked to "+sink.toString());
+			DefaultLog.v("Violation-"+id, strictSource+" has leaked to "+sink.toString());
 		}
 		if(potentialSource.endsWith("+")) {
 			potentialSource = potentialSource.substring(0, potentialSource.length()-1);
-			DefaultLog.v("DataLeakViolation-"+id, potentialSource+" may have leaked to "+sink.toString());
+			//DefaultLog.v("DataLeakViolation-"+id, potentialSource+" may have leaked to "+sink.toString());
 		}
 		
 		for(MonitorEvent event:events){
-			DefaultLog.v("DataLeakViolationTrace-"+id, event.toString());
+			if(event.sameThread(sink))
+				DefaultLog.v("VTrace-"+id, event.toString());
 		}
 	}
 }
