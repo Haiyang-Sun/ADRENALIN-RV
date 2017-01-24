@@ -9,14 +9,19 @@ import ch.usi.dag.rv.infoleak.events.datasink.DataSinkEvent;
 import ch.usi.dag.rv.infoleak.events.datasource.DataSourceEvent;
 import ch.usi.dag.rv.utils.DefaultLog;
 
-public class DataLeakEventProcessing implements MonitorEventProcessor{
+public class DataLeakEventProcessing extends MonitorEventProcessor{
+	public DataLeakEventProcessing(){
+		super();
+	}
     @Override
-    public void process (final List <MonitorEvent> events) {
+    public void process(MonitorEventQueue eventQueue) {
         final ArrayList<DataSourceEvent> sources = new ArrayList <DataSourceEvent> ();
-        for(final MonitorEvent event: events){
+        MonitorEvent lastEvent = null;
+        for(final MonitorEvent event: eventQueue){
             if(!event.needProcess ()) {
                 continue;
             }
+            lastEvent = event;
             if(event instanceof DataSourceEvent){
                 sources.add ((DataSourceEvent)event);
             }
@@ -25,7 +30,6 @@ public class DataLeakEventProcessing implements MonitorEventProcessor{
         	return;
         }
         ArrayList<DataSourceEvent> validSources = new ArrayList<DataSourceEvent>();
-        MonitorEvent lastEvent = events.get (events.size ()-1);
         if(lastEvent instanceof DataSinkEvent){
             final DataSinkEvent sink = (DataSinkEvent)lastEvent;
             for(final DataSourceEvent source : sources){
@@ -35,10 +39,9 @@ public class DataLeakEventProcessing implements MonitorEventProcessor{
                 }
             }
             if(!validSources.isEmpty()) {
-            	DataLeakViolation violation = new DataLeakViolation(validSources, new ArrayList<MonitorEvent>(events), sink);
+            	DataLeakViolation violation = new DataLeakViolation(validSources, eventQueue, sink);
             	violation.print();
             }
         }
     }
-
 }

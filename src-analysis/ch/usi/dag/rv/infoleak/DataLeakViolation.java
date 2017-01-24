@@ -9,10 +9,10 @@ import ch.usi.dag.rv.infoleak.events.datasource.DataSourceEvent;
 import ch.usi.dag.rv.utils.DefaultLog;
 
 public class DataLeakViolation extends MonitorViolation{
-	List<DataSourceEvent> sources;
+	Iterable<DataSourceEvent> sources;
 	DataSinkEvent sink;
-	List<MonitorEvent> events;
-	DataLeakViolation(List<DataSourceEvent> sources, List<MonitorEvent> events, DataSinkEvent sink){
+	Iterable<MonitorEvent> events;
+	DataLeakViolation(Iterable<DataSourceEvent> sources, Iterable<MonitorEvent> events, DataSinkEvent sink){
 		super();
 		this.events = events;
 		this.sources = sources;

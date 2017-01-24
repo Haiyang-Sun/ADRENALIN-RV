@@ -6,7 +6,7 @@ import ch.usi.dag.disl.marker.BodyMarker;
 import ch.usi.dag.disl.staticcontext.DexStaticContext;
 import ch.usi.dag.disl.staticcontext.MethodStaticContext;
 import ch.usi.dag.rv.MonitorEvent;
-import ch.usi.dag.rv.infoleak.DataLeakMonitorState;
+import ch.usi.dag.rv.MonitorState;
 import ch.usi.dag.rv.infoleak.events.MethodEntryEvent;
 import ch.usi.dag.rv.infoleak.events.MethodExitEvent;
 
@@ -16,7 +16,7 @@ public class MethodTraceDiSLClass {
         )
     public static void before_enter (final DexStaticContext dsc) {
     	MonitorEvent event = new MethodEntryEvent (dsc.getDexShortName(), dsc.thisMethodFullName ());
-        DataLeakMonitorState.addEvent (event);
+        MonitorState.newEvent (event);
     }
     
     @After (
@@ -24,6 +24,6 @@ public class MethodTraceDiSLClass {
         )
     public static void after_enter (final DexStaticContext dsc) {
     	MonitorEvent event = new MethodExitEvent (dsc.getDexShortName(), dsc.thisMethodFullName ());
-        DataLeakMonitorState.addEvent (event);
+    	MonitorState.newEvent (event);
     }
 }

@@ -6,20 +6,22 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+import ch.usi.dag.rv.MonitorEventProcessor.MonitorEventQueue;
+import ch.usi.dag.rv.infoleak.DataLeakEventProcessing;
 import ch.usi.dag.rv.utils.DefaultLog;
 import ch.usi.dag.rv.utils.Runtime;
 
-public abstract class MonitorState {
-	HashMap<Long, ThreadEventQueue> threadEventQueues = new HashMap<Long, MonitorState.ThreadEventQueue>();
-	List<MonitorEventProcessor> processings = new LinkedList<MonitorEventProcessor>();
-	List<MonitorEvent> globalEvents = new LinkedList<MonitorEvent>();
+public class MonitorState {
+	static HashMap<Long, ThreadEventQueue> threadEventQueues = new HashMap<Long, MonitorState.ThreadEventQueue>();
+	static List<MonitorEventProcessor> processings = new LinkedList<MonitorEventProcessor>();
+	static List<MonitorEvent> globalEvents = new LinkedList<MonitorEvent>();
 
-	public synchronized void addProcessing(
+	public synchronized static void addProcessing(
 			final MonitorEventProcessor processing) {
 		processings.add(processing);
 	}
 
-	public synchronized void newEvent(final MonitorEvent e) {
+	public synchronized static void newEvent(final MonitorEvent e) {
 		if (e.isThreadLocal()) {
 			final long tid = Runtime.getThreadId();
 			if (!threadEventQueues.containsKey(tid))
@@ -27,41 +29,41 @@ public abstract class MonitorState {
 			ThreadEventQueue eventQ = threadEventQueues.get(tid);
 			eventQ.addEvent(e);
 			if (e.needProcess()) {
-				eventQ.process(processings);
+				eventQ.process();
 			}
 		} else {
 			globalEvents.add(e);
-			for (ThreadEventQueue eventQ : threadEventQueues.values()) {
-				eventQ.addEvent(e);
-				if (e.needProcess()) {
-					eventQ.process(processings);
+			if (e.needProcess()) {
+				for (ThreadEventQueue eventQ : threadEventQueues.values()) {
+					//eventQ.addEvent(e);
+					eventQ.process();
 				}
 			}
 		}
 	}
 	
-	class ThreadEventQueue {
+	static class ThreadEventQueue {
 		int noneProcessableCount = 0;
-		List<MonitorEvent> eventList = new ArrayList<MonitorEvent>();
+		List<MonitorEvent> localEvents = new ArrayList<MonitorEvent>();
 		public ThreadEventQueue(){
-			this.eventList.addAll(globalEvents);
+			//this.eventList.addAll(globalEvents);
 		}
 		public void addEvent(MonitorEvent e) {
 			if(!e.needProcess()){
 				noneProcessableCount++;
 			}
-			if(noneProcessableCount > 10000) {
+			if(noneProcessableCount > 1000) {
 				cleanEventList();
 			}
-			this.eventList.add(e);
+			this.localEvents.add(e);
 		}
-		public void process(List<MonitorEventProcessor> processings) {
+		public void process() {
 			for (final MonitorEventProcessor p : processings) {
-				p.process(this.eventList);
+				p.process(new MonitorEventQueue(globalEvents, localEvents));
 			}
 		}
 		private void cleanEventList(){
-			Iterator<MonitorEvent> iter = this.eventList.iterator();
+			Iterator<MonitorEvent> iter = this.localEvents.iterator();
 			while(iter.hasNext()){
 				MonitorEvent event = iter.next();
 				if(!event.needProcess()){
