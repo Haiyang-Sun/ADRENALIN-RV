@@ -10,4 +10,7 @@ public class DefaultLog {
     public static void d(final String tag, final String args){
         Log.d(TagPrefix+tag, Runtime.getPid() +"-"+ Runtime.getThreadId()+": " + args);
     }
+    public static void e(final String tag, final String args){
+        Log.e(TagPrefix+"Error-"+tag, Runtime.getPid() +"-"+ Runtime.getThreadId()+": " + args);
+    }
 }

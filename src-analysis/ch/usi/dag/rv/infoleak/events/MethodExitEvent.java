@@ -1,14 +1,16 @@
 package ch.usi.dag.rv.infoleak.events;
 
-import ch.usi.dag.rv.MonitorEvent;
+import ch.usi.dag.rv.Event;
+import ch.usi.dag.rv.infoleak.DataLeakEvent;
+import ch.usi.dag.rv.utils.Runtime;
 
-public class MethodExitEvent extends MonitorEvent{
+public class MethodExitEvent extends DataLeakEvent{
     public MethodExitEvent(String dexName, final String method){
-    	super (dexName, "MethodTrace exiting "+method, true);
+    	super (dexName, "MethodTrace exiting "+method, (int) Runtime.getThreadId());
     }
 
     @Override
-    public boolean needProcess(){
+    public boolean needProcessing(){
         return false;
     }
 }

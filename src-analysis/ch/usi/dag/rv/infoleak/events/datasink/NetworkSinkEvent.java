@@ -16,7 +16,7 @@ public class NetworkSinkEvent extends DataSinkEvent{
     		String dexName, final FileDescriptor fd, final byte [] buffer, final int byteOffset,
         final int sentSize, final int flags, final InetAddress address, final int port) {
         super(dexName,
-            "NetworkSend to "
+            "NetworkSend/"
             +(!fdToAddress.containsKey(fd)?"":fdToAddress.get(fd).getHostAddress())
             +":"+port
             , buffer, byteOffset, sentSize

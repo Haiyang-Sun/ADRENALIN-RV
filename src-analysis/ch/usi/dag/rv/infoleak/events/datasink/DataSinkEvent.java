@@ -2,14 +2,16 @@ package ch.usi.dag.rv.infoleak.events.datasink;
 
 import java.util.Arrays;
 
-import ch.usi.dag.rv.MonitorEvent;
+import ch.usi.dag.rv.Event;
+import ch.usi.dag.rv.infoleak.DataLeakEvent;
 import ch.usi.dag.rv.infoleak.events.datasource.DataSourceEvent;
+import ch.usi.dag.rv.utils.Runtime;
 
-public abstract class DataSinkEvent extends MonitorEvent{
+public abstract class DataSinkEvent extends DataLeakEvent{
     byte[] content;
 
     public DataSinkEvent(String dexName, final String desc, final byte[] value, final int off, final int length){
-        super(dexName, desc, true);
+        super(dexName, desc, (int) Runtime.getThreadId());
         if(value == null){
             content = new byte[0];
             return;
