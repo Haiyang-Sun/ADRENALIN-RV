@@ -2,7 +2,6 @@ package ch.usi.dag.rv.infoleak.events.datasink;
 
 import java.util.Arrays;
 
-import ch.usi.dag.rv.Event;
 import ch.usi.dag.rv.infoleak.DataLeakEvent;
 import ch.usi.dag.rv.infoleak.events.datasource.DataSourceEvent;
 import ch.usi.dag.rv.utils.Runtime;

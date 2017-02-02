@@ -26,8 +26,12 @@ public class ContextManager {
 		}
 		return res;
 	}
-	public static class MonitorState{
-		
+	public static abstract class MonitorState{
+		protected MonitorContext ctx;
+		public MonitorState(MonitorContext ctx){
+			this.ctx = ctx;
+		}
+		public abstract boolean isViolated();
 	}
 	public static class MonitorContext {
 		private int contextId;

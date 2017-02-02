@@ -1,6 +1,5 @@
 package ch.usi.dag.rv.infoleak.events;
 
-import ch.usi.dag.rv.Event;
 import ch.usi.dag.rv.infoleak.DataLeakEvent;
 import ch.usi.dag.rv.utils.Runtime;
 

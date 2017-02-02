@@ -42,6 +42,6 @@ public abstract class Event {
     }
     @Override
     public String toString(){
-    	return desc+"("+dexName+")";
+    	return desc+"(dex:"+dexName+" tid:"+tid+")";
     }
 }

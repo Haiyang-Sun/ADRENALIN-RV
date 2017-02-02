@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
 import ch.usi.dag.rv.ContextManager.MonitorContext;
+import ch.usi.dag.rv.utils.DefaultLog;
 
 public class ProcessorManager {
 	public static abstract class MonitorEventProcessor {

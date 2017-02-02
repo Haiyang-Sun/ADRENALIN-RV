@@ -11,7 +11,6 @@ import ch.usi.dag.disl.processorcontext.ArgumentProcessorMode;
 import ch.usi.dag.disl.staticcontext.DexStaticContext;
 import ch.usi.dag.rv.ProcessorManager;
 import ch.usi.dag.rv.infoleak.events.datasink.NetworkSinkEvent;
-import ch.usi.dag.rv.utils.DefaultLog;
 
 public class NetworkDiSLClass {
 	@Before(marker = BodyMarker.class, order = 1, 
