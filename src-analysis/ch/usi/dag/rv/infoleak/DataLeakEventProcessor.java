@@ -35,10 +35,10 @@ public class DataLeakEventProcessor extends MonitorEventProcessor{
 		}
 	}
 	public synchronized DataLeakState getState(MonitorContext ctx){
-		DataLeakState res = ctx.getState();
+		DataLeakState res = ctx.getState(this);
 		if(res == null) {
 			res = new DataLeakState();
-			ctx.setState(res);
+			ctx.setState(this, res);
 		}
 		return res;
 	}

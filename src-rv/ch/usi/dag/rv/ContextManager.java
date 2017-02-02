@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import ch.usi.dag.rv.ProcessorManager.MonitorEventProcessor;
 import ch.usi.dag.rv.utils.DefaultLog;
 import ch.usi.dag.rv.utils.MixedEventQueue;
 
@@ -33,12 +34,12 @@ public class ContextManager {
 		private MonitorContext parent;
 		HashSet<MonitorContext> children = new HashSet<MonitorContext>();
 		List<Event> events = new ArrayList<Event>();
-		MonitorState state = null;
-		public synchronized <T extends MonitorState> void setState (T state) {
-			this.state = state;
+		HashMap<Long, MonitorState> state = new HashMap<Long, ContextManager.MonitorState>();
+		public synchronized <T extends MonitorState> void setState (MonitorEventProcessor processor,T state) {
+			this.state.put(processor.id, state);
 		}
-		public <T extends MonitorState> T getState () {
-			return (T)state;
+		public <T extends MonitorState> T getState (MonitorEventProcessor processor) {
+			return (T)(state.get(processor.id));
 		}
 		public MonitorContext(int contextId){
 			this.contextId = contextId;
