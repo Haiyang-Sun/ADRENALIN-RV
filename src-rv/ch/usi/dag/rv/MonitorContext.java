@@ -19,15 +19,17 @@ public class MonitorContext {
 		this.contextId = contextId;
 		this.parent = null;
 	}
-	public MonitorContext(MonitorContext parentCtx, int contextId){
-		this.contextId = contextId;
-		addParent(parentCtx);
-	}
 	public MonitorContext getParent() {
 		return parent;
 	}
 	public int getContextId() {
 		return contextId;
+	}
+	public void reset(){
+		this.parent.children.remove(this);
+		children.clear();
+		events.clear();
+		state.clear();
 	}
 	public Set<MonitorContext> getChildrenContext(){
 		HashSet<MonitorContext> res = new HashSet<MonitorContext>();
@@ -42,10 +44,21 @@ public class MonitorContext {
 			getChildren(child, res);
 		}
 	}
-	public void addParent(MonitorContext ctxctx){
-		this.parent = ctxctx;
+	public void updateParent(MonitorContext ctxctx){
 		if(ctxctx != null) {
-			ctxctx.children.add(this);
+			
+			if(this.parent == null) {
+				this.parent = ctxctx;
+				if(ctxctx != null) {
+					ctxctx.children.add(this);
+				}
+			}else if(this.parent.getContextId() == ctxctx.contextId) {
+				return;
+			}else {
+				reset();
+				this.parent = ctxctx;
+				ctxctx.children.add(this);
+			}
 		}
 	}
 	public Iterable<MonitorEvent> getEvents(long timestamp) {

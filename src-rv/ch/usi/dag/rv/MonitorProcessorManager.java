@@ -22,7 +22,7 @@ public class MonitorProcessorManager {
 //	private static void newEvent(MonitorContext parentCtx, final Event e) {
 	public synchronized static void newEvent(final MonitorEvent e){
 		int cid = e.getContextId();
-		MonitorContext ctx = MonitorManager.getContext(cid);
+		MonitorContext ctx = MonitorContextManager.getContext(cid);
 		ctx.addEvent(e);
 		//only process the event which need processing
 		if(e.needProcessing()){
