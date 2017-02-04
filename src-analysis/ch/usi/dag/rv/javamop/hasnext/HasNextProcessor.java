@@ -1,40 +1,37 @@
 package ch.usi.dag.rv.javamop.hasnext;
 
-import ch.usi.dag.rv.ContextManager.MonitorContext;
-import ch.usi.dag.rv.ContextManager.MonitorState;
-import ch.usi.dag.rv.Event;
-import ch.usi.dag.rv.ProcessorManager.MonitorEventProcessor;
-import ch.usi.dag.rv.Violation;
+import ch.usi.dag.rv.MonitorContext;
+import ch.usi.dag.rv.MonitorState;
+import ch.usi.dag.rv.MonitorEvent;
+import ch.usi.dag.rv.MonitorEventProcessor;
+import ch.usi.dag.rv.MonitorViolation;
 
 public class HasNextProcessor extends MonitorEventProcessor{
 	public HasNextProcessor() {
 		super("HasNext");
 	}
-	public boolean filterEvent(Event e){
+	public boolean filterEvent(MonitorEvent e){
 		//return e.getClass().getName().contains("ch.usi.dag.rv.javamop.hasnext");
 		return e instanceof HasNextCaseEvent;
 	}
     class HasNextState extends MonitorState{
 		public HasNextState(MonitorContext ctx) {
-			super(ctx);
+			super(HasNextProcessor.this, ctx);
 		}
-		int state = 0;
-		public void onHasNext(){
+		public void onHasNext(HasNextEvent event){
 			state = 1;
 		}
-		public void onNext(){
+		public void onNext(NextEvent event){
 			if(state > 0)
 				state = 0;
-			else 
-				state = -1;
-		}
-		@Override
-		public boolean isViolated() {
-			return state < 0;
+			else {
+				new MonitorViolation(ctx, processor, "hasnext violated for "+event).print();
+				state = 0;
+			}
 		}
 	}
 	public synchronized HasNextState getState(MonitorContext ctx){
-		HasNextState res = ctx.getState(this);
+		HasNextState res = (HasNextState) ctx.getState(this);
 		if(res == null) {
 			res = new HasNextState(ctx);
 			ctx.setState(this, res);
@@ -43,15 +40,12 @@ public class HasNextProcessor extends MonitorEventProcessor{
 	}
 	
 	@Override
-	public boolean process(MonitorContext ctx, Event event) {
+	public boolean process(MonitorContext ctx, MonitorEvent event) {
 		HasNextState state = getState(ctx);
 		if(event instanceof HasNextEvent){
-			state.onHasNext();
+			state.onHasNext((HasNextEvent) event);
 		}else if(event instanceof NextEvent){
-			state.onNext();
-		}
-		if(state.isViolated()){
-			new Violation(ctx, this, "hasnext violated for "+event).print();;
+			state.onNext((NextEvent)event);
 		}
 		return true;
 	}

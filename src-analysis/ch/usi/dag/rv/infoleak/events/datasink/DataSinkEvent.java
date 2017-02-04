@@ -2,6 +2,7 @@ package ch.usi.dag.rv.infoleak.events.datasink;
 
 import java.util.Arrays;
 
+import ch.usi.dag.rv.MonitorManager;
 import ch.usi.dag.rv.infoleak.DataLeakEvent;
 import ch.usi.dag.rv.infoleak.events.datasource.DataSourceEvent;
 import ch.usi.dag.rv.utils.Runtime;
@@ -16,6 +17,7 @@ public abstract class DataSinkEvent extends DataLeakEvent{
             return;
         }
         content = Arrays.copyOfRange (value, off, length+off);
+        MonitorManager.bindContext((int) Runtime.getThreadId(), 0);
     }
 
     public boolean matches (final DataSourceEvent se) {

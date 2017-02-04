@@ -2,9 +2,11 @@ package ch.usi.dag.rv;
 
 import java.util.concurrent.atomic.AtomicLong;
 
+import android.R.integer;
+import android.nfc.INfcTag;
 import ch.usi.dag.rv.utils.Runtime;
 
-public abstract class Event {
+public abstract class MonitorEvent {
 	
 	protected long tid;
     protected int pid;
@@ -16,7 +18,7 @@ public abstract class Event {
     protected int contextId;
     static AtomicLong eventGen = new AtomicLong(0);
     
-    public Event(String dexName, final String desc, int ctxId){
+    public MonitorEvent(String dexName, final String desc, int ctxId){
         this.timestamp = eventGen.incrementAndGet();//System.nanoTime();
         this.tid = Runtime.getThreadId();
         this.pid = Runtime.getPid();

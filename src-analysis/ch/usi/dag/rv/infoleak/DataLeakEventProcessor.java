@@ -2,11 +2,11 @@ package ch.usi.dag.rv.infoleak;
 
 import java.util.ArrayList;
 
-import ch.usi.dag.rv.ContextManager.MonitorContext;
-import ch.usi.dag.rv.ContextManager.MonitorState;
-import ch.usi.dag.rv.Event;
-import ch.usi.dag.rv.ProcessorManager.MonitorEventProcessor;
-import ch.usi.dag.rv.Violation;
+import ch.usi.dag.rv.MonitorContext;
+import ch.usi.dag.rv.MonitorState;
+import ch.usi.dag.rv.MonitorEvent;
+import ch.usi.dag.rv.MonitorEventProcessor;
+import ch.usi.dag.rv.MonitorViolation;
 import ch.usi.dag.rv.infoleak.events.datasink.DataSinkEvent;
 import ch.usi.dag.rv.infoleak.events.datasource.DataSourceEvent;
 
@@ -15,26 +15,18 @@ public class DataLeakEventProcessor extends MonitorEventProcessor{
 		super("DataLeak");
 	}
 	@Override
-	public boolean filterEvent(Event e){
+	public boolean filterEvent(MonitorEvent e){
 		return e instanceof DataLeakEvent;
 	}
     class DataLeakState extends MonitorState{
-		int state = 0;
-		//extra field
 		ArrayList<DataSourceEvent> sources = new ArrayList <DataSourceEvent> ();
 		public DataLeakState(MonitorContext ctx) {
-			super(ctx);
+			super(DataLeakEventProcessor.this, ctx);
 		}
 		public void onDataSource(DataSourceEvent source) {
-			state = 1;
+			state = -1;
 			sources.add(source);
 		}
-
-		@Override
-		public boolean isViolated() {
-			return state < 0;
-		}
-
 		public boolean extraCheck(DataSinkEvent event){
 			DataLeakState parentState = null;
 			if(this.ctx.getParent() == null){
@@ -43,7 +35,7 @@ public class DataLeakEventProcessor extends MonitorEventProcessor{
 			parentState = getState(this.ctx.getParent());
 			if(parentState != null) {
 				for(DataSourceEvent source: parentState.sources){
-					if(event.matches(source))
+					if(event.matches(source) && source.getThreadId() == event.getThreadId())
 						return true;
 				}
 			}
@@ -51,13 +43,16 @@ public class DataLeakEventProcessor extends MonitorEventProcessor{
 		}
 		
 		public void onDataSink(DataSinkEvent event) {
-        	if(state > 0 || extraCheck(event)) {
-        		state = -1;
+        	if(extraCheck(event)) {
+        		MonitorViolation violation = new MonitorViolation(this.ctx, this.processor, "DataLeak Detected");
+            	violation.print();
         	}
 		}
 	}
+    
+    @Override
 	public synchronized DataLeakState getState(MonitorContext ctx){
-		DataLeakState res = ctx.getState(this);
+		DataLeakState res = (DataLeakState) ctx.getState(this);
 		if(res == null) {
 			res = new DataLeakState(ctx);
 			ctx.setState(this, res);
@@ -66,17 +61,13 @@ public class DataLeakEventProcessor extends MonitorEventProcessor{
 	}
 	
     @Override
-    public boolean process(MonitorContext context, Event event) {
+    public boolean process(MonitorContext context, MonitorEvent event) {
     	DataLeakState state = getState(context);
     	
         if(event instanceof DataSourceEvent){
             state.onDataSource ((DataSourceEvent)event);
         }else if(event instanceof DataSinkEvent){ 
         	state.onDataSink((DataSinkEvent)event);
-        }
-        if(state.isViolated()){
-        	Violation violation = new Violation(context, this, "DataLeak Detected");
-        	violation.print();
         }
         return false;
     }

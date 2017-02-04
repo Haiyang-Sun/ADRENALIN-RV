@@ -3,30 +3,41 @@ package ch.usi.dag.rv.utils;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-import ch.usi.dag.rv.Event;
+import ch.usi.dag.rv.MonitorEvent;
 
 //treat two iterable of events as one and sort by timestamp
-public class MixedEventQueue implements Iterable<Event> {
-	Iterable<Event> parantEvents;
-	Iterable<Event> childEvents;
-
-	public MixedEventQueue(Iterable<Event> globalEvents,
-			Iterable<Event> localEvents) {
+//TODO
+//make sure two are iterated in timestamp order
+//add implement for the field timestamp
+public class MixedEventQueue implements Iterable<MonitorEvent> {
+	Iterable<MonitorEvent> parantEvents;
+	Iterable<MonitorEvent> childEvents;
+	long timestamp;
+	public MixedEventQueue(Iterable<MonitorEvent> globalEvents,
+			Iterable<MonitorEvent> localEvents, long timestamp) {
 		this.parantEvents = globalEvents;
 		this.childEvents = localEvents;
+		this.timestamp = timestamp;
+	}
+	
+	public MixedEventQueue(Iterable<MonitorEvent> globalEvents,
+			Iterable<MonitorEvent> localEvents) {
+		this.parantEvents = globalEvents;
+		this.childEvents = localEvents;
+		this.timestamp = -1;
 	}
 
 	@Override
-	public Iterator<Event> iterator() {
+	public Iterator<MonitorEvent> iterator() {
 		return new MixedIterator();
 	}
 
-	class MixedIterator implements Iterator<Event> {
-		Iterator<Event> iter1;
-		Iterator<Event> iter2;
+	class MixedIterator implements Iterator<MonitorEvent> {
+		Iterator<MonitorEvent> iter1;
+		Iterator<MonitorEvent> iter2;
 		int flag;
-		Event buf1;
-		Event buf2;
+		MonitorEvent buf1;
+		MonitorEvent buf2;
 
 		public MixedIterator() {
 			iter1 = parantEvents.iterator();
@@ -43,8 +54,8 @@ public class MixedEventQueue implements Iterable<Event> {
 		}
 
 		@Override
-		public Event next() {
-			Event res;
+		public MonitorEvent next() {
+			MonitorEvent res;
 			if (buf1 == null && !iter1.hasNext()) {
 				res = buf2 != null ? buf2 : iter2.next();
 				buf2 = null;

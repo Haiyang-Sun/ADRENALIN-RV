@@ -9,7 +9,7 @@ import ch.usi.dag.disl.marker.BodyMarker;
 import ch.usi.dag.disl.processorcontext.ArgumentProcessorContext;
 import ch.usi.dag.disl.processorcontext.ArgumentProcessorMode;
 import ch.usi.dag.disl.staticcontext.DexStaticContext;
-import ch.usi.dag.rv.ProcessorManager;
+import ch.usi.dag.rv.MonitorProcessorManager;
 import ch.usi.dag.rv.infoleak.events.datasink.NetworkSinkEvent;
 
 public class NetworkDiSLClass {
@@ -25,7 +25,7 @@ public class NetworkDiSLClass {
 		final int flags = (int) args[4];
 		final InetAddress address = (InetAddress) args[5];
 		final int port = (int) args[6];
-		ProcessorManager.newEvent(0, new NetworkSinkEvent(dsc
+		MonitorProcessorManager.newEvent(new NetworkSinkEvent(dsc
 				.getDexShortName(), fd, buffer, byteOffset, byteCount, flags,
 				address, port));
 	}
@@ -41,7 +41,7 @@ public class NetworkDiSLClass {
 		final InetAddress address = (InetAddress) args[3];
 		final int port = (int) args[4];
 		if (buffer != null) {
-			ProcessorManager.newEvent(0, new NetworkSinkEvent(dsc
+			MonitorProcessorManager.newEvent(new NetworkSinkEvent(dsc
 					.getDexShortName(), fd, buffer.array(), buffer.position(),
 					buffer.remaining(), flags, address, port));
 		}

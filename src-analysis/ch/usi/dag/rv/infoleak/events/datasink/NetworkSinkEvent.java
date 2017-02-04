@@ -4,6 +4,8 @@ import java.io.FileDescriptor;
 import java.net.InetAddress;
 import java.util.HashMap;
 
+import ch.usi.dag.rv.MonitorManager;
+
 public class NetworkSinkEvent extends DataSinkEvent{
 	static HashMap<FileDescriptor, InetAddress> fdToAddress = new HashMap<FileDescriptor, InetAddress>();
 	public static void registerFd(FileDescriptor fd, InetAddress address){

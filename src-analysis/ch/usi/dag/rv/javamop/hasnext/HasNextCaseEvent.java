@@ -2,17 +2,16 @@ package ch.usi.dag.rv.javamop.hasnext;
 
 import java.util.Iterator;
 
-import ch.usi.dag.rv.Event;
-import ch.usi.dag.rv.ProcessorManager;
+import android.R.integer;
+import ch.usi.dag.rv.MonitorEvent;
+import ch.usi.dag.rv.MonitorProcessorManager;
+import ch.usi.dag.rv.utils.DefaultLog;
 
-public class HasNextCaseEvent extends Event {
+public class HasNextCaseEvent extends MonitorEvent {
 	static {
-		ProcessorManager.addProcessor(new HasNextProcessor());
+		MonitorProcessorManager.addProcessor(new HasNextProcessor());
 	}
-	Iterator<?> iter;
-	public HasNextCaseEvent(String dexName, String desc, Iterator<?> iter) {
-		super(dexName, "HasNext-"+desc, System.identityHashCode(iter));
-		this.iter = iter;
+	public HasNextCaseEvent(String dexName, String desc, int ctxId) {
+		super(dexName, "HasNext-"+desc, ctxId);
 	}
-
 }
