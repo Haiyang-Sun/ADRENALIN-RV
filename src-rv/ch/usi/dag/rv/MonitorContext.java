@@ -3,10 +3,13 @@ package ch.usi.dag.rv;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import ch.usi.dag.rv.MonitorEventProcessor;
+import ch.usi.dag.rv.utils.DefaultLog;
 import ch.usi.dag.rv.utils.MixedEventQueue;
 
 public class MonitorContext {
@@ -15,6 +18,9 @@ public class MonitorContext {
 	HashSet<MonitorContext> children = new HashSet<MonitorContext>();
 	List<MonitorEvent> events = new ArrayList<MonitorEvent>();
 	HashMap<Long, MonitorState> state = new HashMap<Long, MonitorState>();
+	public synchronized static int getContextId(Object obj){
+		return System.identityHashCode(obj);
+	}
 	public MonitorContext(int contextId){
 		this.contextId = contextId;
 		this.parent = null;
