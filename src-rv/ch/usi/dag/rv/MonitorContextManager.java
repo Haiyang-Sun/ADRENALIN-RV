@@ -33,7 +33,6 @@ public class MonitorContextManager {
 			res.updateParent(parent);
 		}
 		if(parent != null && res.getParent()!=null && !res.getParent().equals(parent) ){
-			DefaultLog.e("A context cannot have multiple parents", ctxId + " => " + parent.getContextId() + " & " + res.getParent().getContextId());
 			res.updateParent(parent);
 		}
 	}
