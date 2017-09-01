@@ -14,13 +14,25 @@
         <pathelement location="output/build/instr"/>
         <pathelement location="lib/disl-server.jar"/>
         <pathelement location="lib/asm-debug-all-5.0.3.jar"/>
+        <pathelement location="lib/antlr-4.7-complete.jar"/>
         <pathelement location="lib/core.jar"/>
         <pathelement location="lib/framework.jar"/>
+    </path>
+    <path id="bytecode.classpath">
+        <pathelement location="lib/d2j-base-cmd-2.1-SNAPSHOT.jar"/>
+        <pathelement location="lib/dex-ir-2.1-SNAPSHOT.jar"/>
+        <pathelement location="lib/dex-reader-2.1-SNAPSHOT.jar"/>
+        <pathelement location="lib/dex-reader-api-2.1-SNAPSHOT.jar"/>
+        <pathelement location="lib/dex-tools-2.1-SNAPSHOT.jar"/>
+        <pathelement location="lib/dex-translator-2.1-SNAPSHOT.jar"/>
+        <pathelement location="lib/dx.jar"/>
+        <pathelement location="lib/jadb-1.0.0-SNAPSHOT.jar"/>
     </path>
     <target name="init">
         <mkdir dir="output/build/rv"/>
         <mkdir dir="output/build/analysis"/>
         <mkdir dir="output/build/instr"/>
+        <mkdir dir="output/build/test"/>
         <mkdir dir="dexes"/>
         <mkdir dir="adbfolder/recv/dex"/>
         <mkdir dir="adbfolder/send/dex"/>
@@ -32,12 +44,12 @@
                 <exclude name="**/*.java"/>
             </fileset>
         </copy>
-        <copy includeemptydirs="false" todir="output/build/analysis">
-            <fileset dir="src-analysis">
-                <exclude name="**/*.launch"/>
-                <exclude name="**/*.java"/>
-            </fileset>
-        </copy>
+        <!--<copy includeemptydirs="false" todir="output/build/analysis">-->
+            <!--<fileset dir="src-analysis">-->
+                <!--<exclude name="**/*.launch"/>-->
+                <!--<exclude name="**/*.java"/>-->
+            <!--</fileset>-->
+        <!--</copy>-->
         <copy includeemptydirs="false" todir="output/build/instr">
             <fileset dir="src-instr">
                 <exclude name="**/*.launch"/>
@@ -52,6 +64,13 @@
     </target>
     <target depends="clean" name="cleanall"/>
     <target depends="build-project,build-jar" name="build"/>
+
+    <target name="rv-generation" depends="build-project">
+        <java classname="ch.usi.dag.disldroidserver.DiSLServer" fork="true">
+            <classpath refid="AndroidAnalysis.classpath"/>
+            <jvmarg value="-Drv.gen=true"/>
+        </java>
+    </target>
     <target depends="init" name="build-project">
         <echo message="${ant.project.name}: ${ant.file}"/>
         <javac debug="true" debuglevel="${debuglevel}" destdir="output/build/rv" includeantruntime="false" source="${source}" target="${target}">
@@ -66,10 +85,149 @@
             <src path="src-instr"/>
             <classpath refid="AndroidAnalysis.classpath"/>
         </javac>
+        <javac debug="true" debuglevel="${debuglevel}" destdir="output/build/test" includeantruntime="false" source="${source}" target="${target}">
+            <src path="src-test"/>
+        </javac>
     </target>
-    <target name="build-jar" depends="build-project">
+    <target name="build-jar" depends="build-project, rv-generation">
+        <delete dir="gv"/>
+        <mkdir dir="gv"/>
         <jar destfile="output/lib/rv.jar" basedir="output/build/rv" />
         <jar destfile="output/lib/analysis.jar" basedir="output/build/analysis" />
         <jar destfile="output/lib/instr.jar" basedir="output/build/instr" />
+        <jar destfile="output/lib/test.jar" basedir="output/build/test" />
+        <jar destfile="output/lib/processings.jar" basedir="output/build/processings" />
+    </target>
+    <target name="offline" depends="build-project">
+        <mkdir dir="offline"/>
+        <java classname="ch.usi.dag.disldroidserver.OfflineInstrumentation" fork="true">
+          <classpath>
+            <path refid="AndroidAnalysis.classpath" />
+            <path refid="bytecode.classpath" />
+          </classpath>
+          <arg value="dexes/instr__system_framework_services.jar.dex"/>
+          <arg value="output/build/instr/ch/usi/dag/rv/permission/RemoteDiSLClass.class"/>
+          <arg value="excl.sample"/>
+        </java>
+    </target>
+    <target name="test-rv-weaver" depends="build, rv-generation">
+        <java classname="ch.usi.dag.rv.processing.hasnext" fork="true">
+          <classpath>
+            <path refid="AndroidAnalysis.classpath" />
+            <path location="output/build/processings" />
+          </classpath>
+          <arg value="hasnext"/>
+        </java>
+    </target>
+    <target name="test-processing" depends="build-jar">
+        <java classname="ch.usi.dag.disldroidserver.JavaTest" fork="true">
+            <classpath>
+                <path refid="AndroidAnalysis.classpath" />
+                <path refid="bytecode.classpath" />
+            </classpath>
+            <arg value="output/lib/test.jar"/>
+            <arg value="output/build/instr/ch/usi/dag/rv/javamop/hasnext/HasNextDiSLClass.class"/>
+            <arg value="."/>
+        </java>
+        <java classname="JavaMOPTest" fork="true">
+            <classpath>
+                <path refid="AndroidAnalysis.classpath" />
+                <pathelement location="test.instr.jar"/>
+                <pathelement location="output/lib/processings.jar"/>
+            </classpath>
+            <jvmarg value="-Ddisl.isjvm=true"/>
+            <jvmarg value="-Drv.debug=true"/>
+            <jvmarg value="-noverify"/>
+        </java>
+    </target>
+    <target name="test-processing-debug" depends="build-jar">
+        <java classname="ch.usi.dag.disldroidserver.JavaTest" fork="true">
+            <classpath>
+                <path refid="AndroidAnalysis.classpath" />
+                <path refid="bytecode.classpath" />
+            </classpath>
+            <arg value="output/lib/test.jar"/>
+            <arg value="output/build/instr/ch/usi/dag/rv/javamop/hasnext/HasNextDiSLClass.class"/>
+            <arg value="."/>
+        </java>
+        <java classname="JavaMOPTest" fork="true">
+            <classpath>
+                <path refid="AndroidAnalysis.classpath" />
+                <pathelement location="test.instr.jar"/>
+                <pathelement location="output/lib/processings.jar"/>
+            </classpath>
+            <jvmarg value="-Ddisl.isjvm=true"/>
+            <jvmarg value="-Drv.debug=true"/>
+            <jvmarg value="-noverify"/>
+            <jvmarg value="-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005"/>
+        </java>
+    </target>
+    <target name="test-simulator" depends="build-jar">
+        <java classname="ch.usi.dag.rv.simulator.Simulator" fork="true">
+            <classpath>
+                <path refid="AndroidAnalysis.classpath" />
+                <pathelement location="output/lib/processings.jar"/>
+                <pathelement location="test.instr.jar"/>
+            </classpath>
+            <arg value="./sample_events.log"/>
+            <jvmarg value="-Ddisl.isjvm=true"/>
+            <jvmarg value="-Drv.debug=true"/>
+            <jvmarg value="-Drv.property=remote"/>
+            <jvmarg value="-noverify"/>
+            <!--<jvmarg value="-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005"/>-->
+        </java>
+    </target>
+    <target name="test-simulator-debug" depends="build-jar">
+        <java classname="ch.usi.dag.rv.simulator.Simulator" fork="true">
+            <classpath>
+                <path refid="AndroidAnalysis.classpath" />
+                <pathelement location="test.instr.jar"/>
+                <pathelement location="output/lib/processings.jar"/>
+            </classpath>
+            <arg value="./sample_events.log"/>
+            <jvmarg value="-Ddisl.isjvm=true"/>
+            <jvmarg value="-Drv.debug=true"/>
+            <jvmarg value="-noverify"/>
+            <jvmarg value="-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005"/>
+        </java>
+    </target>
+    <target name="test-dfa" depends="build-jar">
+        <java classname="ch.usi.dag.rv.nfa.NFA2DFATest" fork="true">
+            <classpath>
+                <path refid="AndroidAnalysis.classpath" />
+            </classpath>
+            <jvmarg value="-Ddisl.isjvm=true"/>
+            <!--<jvmarg value="-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005"/>-->
+        </java>
+    </target>
+    <target name="test-service" depends="build-jar">
+        <java classname="ch.usi.dag.rv.simulator.Simulator" fork="true">
+            <classpath>
+                <path refid="AndroidAnalysis.classpath" />
+                <pathelement location="output/lib/processings.jar"/>
+                <pathelement location="test.instr.jar"/>
+            </classpath>
+            <arg value="./raw-data/service.log"/>
+            <jvmarg value="-Ddisl.isjvm=true"/>
+            <jvmarg value="-Drv.debug=true"/>
+            <jvmarg value="-Drv.property=remote"/>
+            <jvmarg value="-noverify"/>
+            <!--<jvmarg value="-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005"/>-->
+        </java>
+    </target>
+    <target name="test-permission" depends="build-jar">
+        <java classname="ch.usi.dag.rv.simulator.Simulator" fork="true">
+            <classpath>
+                <path refid="AndroidAnalysis.classpath" />
+                <pathelement location="output/lib/processings.jar"/>
+                <pathelement location="test.instr.jar"/>
+            </classpath>
+            <arg value="./raw-data/permission.log"/>
+            <jvmarg value="-Ddisl.isjvm=true"/>
+            <jvmarg value="-Drv.debug=true"/>
+            <jvmarg value="-Drv.property=permission"/>
+            <jvmarg value="-noverify"/>
+            <!--<jvmarg value="-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005"/>-->
+        </java>
     </target>
 </project>

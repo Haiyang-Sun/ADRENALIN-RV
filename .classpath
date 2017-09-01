@@ -3,10 +3,13 @@
 	<classpathentry kind="src" output="output/build/rv" path="src-rv"/>
 	<classpathentry kind="src" output="output/build/analysis" path="src-analysis"/>
 	<classpathentry kind="src" output="output/build/instr" path="src-instr"/>
+	<classpathentry kind="src" path="src-test"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
 	<classpathentry kind="lib" path="lib/disl-server.jar"/>
 	<classpathentry kind="lib" path="lib/asm-debug-all-5.0.3.jar"/>
 	<classpathentry kind="lib" path="lib/core.jar"/>
 	<classpathentry kind="lib" path="lib/framework.jar"/>
-	<classpathentry kind="output" path="bin"/>
+	<classpathentry kind="lib" path="output/lib/processings.jar"/>
+	<classpathentry kind="lib" path="lib/antlr-4.7-complete.jar"/>
+	<classpathentry kind="output" path="output/build/test"/>
 </classpath>
