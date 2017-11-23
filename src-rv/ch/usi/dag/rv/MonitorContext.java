@@ -10,27 +10,50 @@ import ch.usi.dag.rv.nfa.AutomataInstance;
 import ch.usi.dag.rv.nfa.DirectedGraph;
 
 public class MonitorContext {
+	// each context has a unique context object
 	public Object contextObj;
-	 
+	
+	// the specific object for global context
 	public static Object GLOBALCTX =  null;
 	 
+	// the parent context of this context, null for global 
 	private MonitorContext parent;
-	HashSet<MonitorContext> children = new HashSet<MonitorContext>();
+	
+	// the children context(s) of this context
+	private HashSet<MonitorContext> children = new HashSet<MonitorContext>();
+
+	// the context manager of this context 
+	private ContextManager mnr;
+	
+	// For each property, we maintain a list of DFA instances (for different roles of an MRE)
+	private HashMap<String,ArrayList<AutomataInstance>> dfaMap = new HashMap<>();
+	
+	
+	// In some rare cases, some classes forbids calling to HashCode
 	public synchronized static int getHash(Object obj){
 		return System.identityHashCode(obj);
 	}
-	ContextManager mnr;
-	MonitorContext(ContextManager mnr){
+	
+	// create global context for mnr
+	public static MonitorContext createGlobal(ContextManager mnr){
+		return new MonitorContext(mnr);
+	}
+	
+	// only used for global context creation
+	private MonitorContext(ContextManager mnr){
 		this.contextObj = GLOBALCTX;
 		this.parent = null;
 		this.mnr = mnr;
 	}
+	
 	public int getPid(){
-		return mnr.monitorProcessorManager.pid;
+		return mnr.getPid();
 	}
+	
+	// create a context for contextObj and managed by mnr
 	public MonitorContext(ContextManager mnr, Object contextObj){
 		this.contextObj = contextObj;
-		this.parent = mnr.globalContext;
+		this.parent = mnr.getGlobalContext();
 		this.parent.children.add(this);
 		this.dfaMap = stateCopy(this.parent.dfaMap);
 		this.mnr = mnr;
@@ -42,49 +65,44 @@ public class MonitorContext {
 	
 	public Set<MonitorContext> getChildrenContext(){
 		HashSet<MonitorContext> res = new HashSet<MonitorContext>();
-		getChildren(this, res);
+		_getChildrenContext(this, res);
 		return res;
 	}
 	
-	public Set<MonitorContext> getParentContext(){
-		HashSet<MonitorContext> res = new HashSet<MonitorContext>();
-		MonitorContext ctx = this;
-		do{
-			res.add(ctx);
-		}
-		while(ctx.parent != null);
-		return res;
-	}
-	
-	private static void getChildren(MonitorContext ctx, HashSet<MonitorContext> res){
+	// helper method for getChildrenContext
+	private static void _getChildrenContext(MonitorContext ctx, HashSet<MonitorContext> res){
 		if(res.contains(ctx))
 			return;
 		res.add(ctx);
 		for(MonitorContext child: ctx.children){
-			getChildren(child, res);
+			_getChildrenContext(child, res);
 		}
 	}
-	public void updateParent(MonitorContext ctxctx){
-		if(ctxctx != null) {
+	
+	//
+	public void updateParent(MonitorContext _parent){
+		if(_parent != null) {
 			if(this.parent == null) {
 				//shuoldn't happen
-				this.parent = ctxctx;
-				if(ctxctx != null) {
-					ctxctx.children.add(this);
+				this.parent = _parent;
+				if(_parent != null) {
+					_parent.children.add(this);
 				}
-			}else if(this.parent.contextObj == ctxctx.contextObj) {
+			}else if(this.parent.contextObj == _parent.contextObj) {
 				return;
 			}else {
 				this.parent.children.remove(this);
-				this.parent = ctxctx;
-				ctxctx.children.add(this);
+				this.parent = _parent;
+				_parent.children.add(this);
 			}
 		}
 	}
+	
 	@Override
 	public int hashCode() {
 		return System.identityHashCode(contextObj);
 	}
+	
 	@Override
 	 public boolean equals(Object obj) {
         if(obj == null) {
@@ -111,8 +129,7 @@ public class MonitorContext {
 		return res;
 	}
 
-	public HashMap<String,ArrayList<AutomataInstance>> dfaMap = new HashMap<>();
-	
+	// reset the DFAs to the start state
 	public void reset(String propertyId, ArrayList<DirectedGraph> _dfas) {
 		ArrayList<AutomataInstance> instances = new ArrayList<AutomataInstance>();
 		for(DirectedGraph dg: _dfas){
@@ -121,6 +138,7 @@ public class MonitorContext {
 		dfaMap.put(propertyId, instances);
 	}
 	
+	// get the DFA instances for a property from the DFA definitions
 	public synchronized ArrayList<AutomataInstance> getDFA(String propertyId, ArrayList<DirectedGraph> _dfas) {
 		if(!dfaMap.containsKey(propertyId))
 			reset(propertyId, _dfas);

@@ -4,21 +4,43 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-//organize events like a tree
+/*
+ * A context manager is used to manage events in different MonitorContext
+ */
 public class ContextManager {
-	HashMap<Integer, List<MonitorContext>> monitorContexts = new HashMap<Integer, List<MonitorContext>>();
-	PropertyProcessorManager monitorProcessorManager;
-	public ContextManager(PropertyProcessorManager monitorProcessorManager) {
-		this.monitorProcessorManager = monitorProcessorManager;
+	// HashMap for MonitorContexts
+	// In some rare cases the hashcode is not accessible, we cannot simply use HashMap<ContextObject, MonitorContext>
+	private HashMap<Integer, List<MonitorContext>> monitorContexts = new HashMap<Integer, List<MonitorContext>>();
+	
+	// Property Manager for multiple properties
+	private PropertyManager propertyManager;
+	
+	// The default root context among all
+	private MonitorContext globalContext = MonitorContext.createGlobal(this);
+		
+	public ContextManager(PropertyManager propertyManager) {
+		this.propertyManager = propertyManager;
 	}
 
+	// To build the dependency for contexts
 	public void bindContext(Object ctxChild, Object ctxParent) {
 		MonitorContext parent = getContext(ctxParent);
 		setContextWithParent(parent, ctxChild);
 	}
+	// helper method for bindContext
+	private void setContextWithParent(MonitorContext parent,
+			Object ctxObject) {
+		MonitorContext res = getContext(ctxObject);
+		if (parent != null && res.getParent() == null) {
+			res.updateParent(parent);
+		}
+		if (parent != null && res.getParent() != null
+				&& !res.getParent().equals(parent)) {
+			res.updateParent(parent);
+		}
+	}
 	
-	MonitorContext globalContext = new MonitorContext(this);
-	
+	// Get or create a new MonitorContext for ctxObject
 	public synchronized MonitorContext getContext(Object ctxObject) {
 		if(ctxObject == MonitorContext.GLOBALCTX)
 			return globalContext;
@@ -43,15 +65,11 @@ public class ContextManager {
 		return res;
 	}
 
-	private void setContextWithParent(MonitorContext parent,
-			Object ctxObject) {
-		MonitorContext res = getContext(ctxObject);
-		if (parent != null && res.getParent() == null) {
-			res.updateParent(parent);
-		}
-		if (parent != null && res.getParent() != null
-				&& !res.getParent().equals(parent)) {
-			res.updateParent(parent);
-		}
+	public int getPid() {
+		return this.propertyManager.pid;
+	}
+
+	public MonitorContext getGlobalContext() {
+		return this.globalContext;
 	}
 }

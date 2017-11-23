@@ -8,7 +8,7 @@ import ch.usi.dag.disl.processorcontext.ArgumentProcessorContext;
 import ch.usi.dag.disl.processorcontext.ArgumentProcessorMode;
 import ch.usi.dag.disl.staticcontext.DexStaticContext;
 import ch.usi.dag.rv.MonitorEvent;
-import ch.usi.dag.rv.PropertyProcessorManager;
+import ch.usi.dag.rv.PropertyManager;
 
 public class PermissionDiSLClass {
 	@Before(marker = BodyMarker.class, scope = "ActivityManager.checkComponentPermission")
@@ -18,8 +18,9 @@ public class PermissionDiSLClass {
 		if (args[0] != null) {
 			final String permisssionUsed = args[0].toString();
 			if (permisssionUsed != null) {
-				PropertyProcessorManager.instance.newEvent(MonitorEvent
-						.newThreadLocalEvent("permission", "check", 
+				System.out.println("permission check "+permisssionUsed);
+				PropertyManager.instance.newEvent(MonitorEvent
+						.newTLEvent("permission", "check", 
 								"",
 								dsc.thisClassSimpleName(),
 								dsc.thisMethodName(),
@@ -28,7 +29,7 @@ public class PermissionDiSLClass {
 		}
 	}
 
-	@Property(name = "permission", ere = "#_(#system_server(check+))", binder = "true", reportAt = "matched" )
+	@Property(name = "permission", ere = "#_((#system_server(check+))+)", binder = "true", reportAt = "matched" )
 	public static void permission(MonitorDynamicContext mdc) {
 		System.out.println("violation found");
 		PermissionAnalysis.process(mdc.getContext(), mdc.getEvents());

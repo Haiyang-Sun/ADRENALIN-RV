@@ -6,7 +6,7 @@ import java.io.ObjectOutput;
 
 import ch.usi.dag.rv.MonitorContext;
 import ch.usi.dag.rv.MonitorEvent;
-import ch.usi.dag.rv.PropertyProcessorManager;
+import ch.usi.dag.rv.PropertyManager;
 import ch.usi.dag.rv.jni.RVNative;
 import ch.usi.dag.rv.utils.AndroidRuntime;
 
@@ -20,6 +20,19 @@ public class BinderEvent extends MonitorEvent{
 	private boolean oneWay;
 	public int toPid;
 	public int toTid;
+	
+	public enum BinderType {
+		REQUEST_SENT(0), 
+		REQUEST_RECEIVING(1), 
+		REQUEST_RECEIVED(2), 
+		REPLY_SENDING(3), 
+		REPLY_SENT(4), 
+		REPLY_RECEIVED(5);
+		public int val;
+		BinderType(int val){
+			this.val = val;
+		}
+	};
 
 	public BinderEvent(int type, int flag, int fromPid, int fromTid, int transactionId, boolean oneWay, int toPid, int toTid) {
 		super("", ""+type, type%5==0?fromPid:toPid,type%5==0?fromTid:toTid ,MonitorContext.GLOBALCTX, "", type, flag, fromPid, fromTid, transactionId, oneWay, toPid, toTid);
@@ -35,7 +48,7 @@ public class BinderEvent extends MonitorEvent{
 	public static void onBinder(int type, int flag, int fromPid, int fromTid, int transactionId, boolean oneWay, int toPid, int toTid){
 		if(type == 0 || type == 1 || type == 4)
 			return;
-		PropertyProcessorManager.instance.newEvent(new BinderEvent(type, flag, fromPid, fromTid, transactionId, oneWay, toPid, toTid));
+		PropertyManager.instance.newEvent(new BinderEvent(type, flag, fromPid, fromTid, transactionId, oneWay, toPid, toTid));
 	}
 	
 	public boolean canIgnore(){

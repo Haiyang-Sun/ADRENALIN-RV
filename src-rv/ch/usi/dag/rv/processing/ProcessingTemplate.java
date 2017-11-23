@@ -61,7 +61,11 @@ public class ProcessingTemplate extends PropertyProcessor {
 			}
 			AutomataState state = dfaInstance.transit(event);
 			if(state == reportAt()){
-				onEnd(ctx, event, dfaInstance);
+				if(dfaInstance.isOutMost()){
+					callback(ctx, dfaInstance.getMatched());
+				}else {
+					storeInBinder(ctx, event, dfaInstance);	
+				}
 			}
 			if(state == AutomataState.END || state == AutomataState.DEAD){
 				dfaInstance.restart();
@@ -70,49 +74,28 @@ public class ProcessingTemplate extends PropertyProcessor {
 		return;
 	}
 
-	public void onEnd(MonitorContext ctx, MonitorEvent last, AutomataInstance dfaInstance) {
+	public void storeInBinder(MonitorContext ctx, MonitorEvent last, AutomataInstance dfaInstance) {
 		List<MonitorEvent> events = dfaInstance.getMatched();
-		if (dfaInstance.isOutMost()) {
-			callback(ctx, events);
-		} else {
-			byte[] mel;
-			// event has to be a binder event
-			BinderEvent be = (BinderEvent) last;
-			List<MonitorEvent> matchedEventList = events;
-			
-//			int oldflag = RVNativeWrapper.getBinderFlag(last.pid, (int)last.tid);
-//			if(oldflag > 0){
-//				ObjectInputStream ois;
-//				try {
-//					ois = new ObjectInputStream(
-//							new ByteArrayInputStream(RVNativeWrapper.getByFlag(last.pid, oldflag)));
-//					List<MonitorEvent> oldList = (List<MonitorEvent>) ois
-//							.readObject();
-//					System.out.println("merging events from different processors");
-//					matchedEventList.addAll(oldList);
-//					ois.close();
-//				} catch (Exception e) {
-//					// TODO Auto-generated catch block
-//					e.printStackTrace();
-//				}
-//			}
-			
-			ByteArrayOutputStream baos = new ByteArrayOutputStream(256);
+		byte[] mel;
+		// event has to be a binder event
+		BinderEvent be = (BinderEvent) last;
+		List<MonitorEvent> matchedEventList = events;
+		
+		ByteArrayOutputStream baos = new ByteArrayOutputStream(256);
 
-			try {
-				ObjectOutputStream oos = new ObjectOutputStream(baos);
-				oos.writeObject(matchedEventList);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-
-			mel = baos.toByteArray();
-
-			int theflag = RVNativeWrapper.setData(mel, last.pid);
-			RVNativeWrapper.setBinderFlag(last.pid, (int) last.tid, theflag);
-			if (RVNativeWrapper.isJVM)
-				RVNativeWrapper.setByBinderEvent(be, theflag);
+		try {
+			ObjectOutputStream oos = new ObjectOutputStream(baos);
+			oos.writeObject(matchedEventList);
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
+
+		mel = baos.toByteArray();
+
+		int theflag = RVNativeWrapper.setData(mel, last.pid);
+		RVNativeWrapper.setBinderFlag(last.pid, (int) last.tid, theflag);
+		if (RVNativeWrapper.isJVM)
+			RVNativeWrapper.setByBinderEvent(be, theflag);
 	}
 
 	public static void callback(MonitorContext ctx, List<MonitorEvent> event) {

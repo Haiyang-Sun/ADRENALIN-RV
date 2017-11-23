@@ -11,6 +11,10 @@ import java.util.concurrent.atomic.AtomicLong;
 import ch.usi.dag.rv.binder.BinderEvent;
 import ch.usi.dag.rv.utils.AndroidRuntime;
 
+/*
+ * All the events in this system 
+ * Should be serializable for passing among processes
+ */
 public class MonitorEvent implements Externalizable {
 	private static final long serialVersionUID = -8388246696418315226L;
 	public long tid;
@@ -26,7 +30,7 @@ public class MonitorEvent implements Externalizable {
     public String processingName;
     
     static AtomicLong eventGen = new AtomicLong(0);
-    public static MonitorEvent newThreadLocalEvent(String processingName, final String eventName, String staticInfo, Serializable... dynamicInfo){
+    public static MonitorEvent newTLEvent(String processingName, final String eventName, String staticInfo, Serializable... dynamicInfo){
     	return new MonitorEvent(processingName, eventName, AndroidRuntime.getPid(), AndroidRuntime.getThreadId(), AndroidRuntime.getThreadId(), staticInfo, dynamicInfo);
     }
     public static MonitorEvent newGlobalEvent(String processingName, final String eventName, String staticInfo, Serializable... dynamicInfo){
@@ -73,7 +77,7 @@ public class MonitorEvent implements Externalizable {
     		sb.append(v);
     		sb.append(" ");
     	}
-    	return "monitor event ("+pname+"): "+name+"("+pid+","+tid+") with value "+sb.toString();
+    	return processingName+" monitor event ("+pname+"): "+name+"("+pid+","+tid+") with value "+sb.toString();
     }
 
 	public Object getContextObject() {

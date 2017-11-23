@@ -12,13 +12,12 @@ public class REMainVisitorV3 extends REBaseVisitor<Map<String, NFA>> {
     @Override
     public Map<String, NFA> visitInitial(REParser.InitialContext ctx) {
         Map<String, NFA> map = new HashMap<>();
-        REParser.MultiprocContext parentCtx = (REParser.MultiprocContext) ctx.getParent();
         for (REParser.MultiprocContext multiprocContext : ctx.multiproc()) {
-
             multiprocContext.processName = ctx.processName;
             Map<String, NFA> initialResult = visitMultiproc(multiprocContext);
 
             NFA existingNFA = map.get(multiprocContext.processName);
+            
             NFA resultNFA = initialResult.get(multiprocContext.processName);
 
             NFA concatNFA = null;
@@ -98,13 +97,14 @@ public class REMainVisitorV3 extends REBaseVisitor<Map<String, NFA>> {
     @Override
     public Map<String, NFA> visitExp(REParser.ExpContext ctx) {
         NFA nfa = new NFA();
+        Map<String, NFA> expNFA = new HashMap<>();
         for (REParser.ItemContext iCtx : ctx.item()) {
             iCtx.processName = ctx.processName;
-            NFA temp = visitItem(iCtx).get(ctx.processName);
+            Map<String, NFA> tmp = visitItem(iCtx);
+            NFA temp = tmp.get(ctx.processName);
             nfa.concatenate(temp);
-
+            expNFA.putAll(tmp);
         }
-        Map<String, NFA> expNFA = new HashMap<>();
         expNFA.put(ctx.processName, nfa);
         return expNFA;
     }
@@ -153,11 +153,11 @@ public class REMainVisitorV3 extends REBaseVisitor<Map<String, NFA>> {
 
     @Override
     public Map<String, NFA> visitPrimary(REParser.PrimaryContext ctx) {
-        REParser.ExpContext expContext = ctx.exp();
+        REParser.InitialContext initialContext = ctx.initial();
 
-        if (expContext != null) {
-            expContext.processName = ctx.processName;
-            return visitExp(expContext);
+        if (initialContext != null) {
+            initialContext.processName = ctx.processName;
+            return visitInitial(initialContext);
         } else {
             Map<String, NFA> map = new HashMap<>();
             map.put(ctx.processName, NFA.recognizesEventName(ctx.ID().getText(), ctx.processName));

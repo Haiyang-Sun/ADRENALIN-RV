@@ -1,23 +1,13 @@
 // Generated from RE.g4 by ANTLR 4.7
 package ch.usi.dag.rv.re;
-import java.util.List;
-
-import org.antlr.v4.runtime.NoViableAltException;
-import org.antlr.v4.runtime.Parser;
-import org.antlr.v4.runtime.ParserRuleContext;
-import org.antlr.v4.runtime.RecognitionException;
-import org.antlr.v4.runtime.RuntimeMetaData;
-import org.antlr.v4.runtime.Token;
-import org.antlr.v4.runtime.TokenStream;
-import org.antlr.v4.runtime.Vocabulary;
-import org.antlr.v4.runtime.VocabularyImpl;
-import org.antlr.v4.runtime.atn.ATN;
-import org.antlr.v4.runtime.atn.ATNDeserializer;
-import org.antlr.v4.runtime.atn.ParserATNSimulator;
-import org.antlr.v4.runtime.atn.PredictionContextCache;
+import org.antlr.v4.runtime.atn.*;
 import org.antlr.v4.runtime.dfa.DFA;
-import org.antlr.v4.runtime.tree.ParseTreeVisitor;
-import org.antlr.v4.runtime.tree.TerminalNode;
+import org.antlr.v4.runtime.*;
+import org.antlr.v4.runtime.misc.*;
+import org.antlr.v4.runtime.tree.*;
+import java.util.List;
+import java.util.Iterator;
+import java.util.ArrayList;
 
 @SuppressWarnings({"all", "warnings", "unchecked", "unused", "cast"})
 public class REParser extends Parser {
@@ -425,8 +415,8 @@ public class REParser extends Parser {
 
 	public static class PrimaryContext extends ParserRuleContext {
 		public String processName= "?";
-		public ExpContext exp() {
-			return getRuleContext(ExpContext.class,0);
+		public InitialContext initial() {
+			return getRuleContext(InitialContext.class,0);
 		}
 		public TerminalNode ID() { return getToken(REParser.ID, 0); }
 		public PrimaryContext(ParserRuleContext parent, int invokingState) {
@@ -453,7 +443,7 @@ public class REParser extends Parser {
 				setState(51);
 				match(T__0);
 				setState(52);
-				exp();
+				initial();
 				setState(53);
 				match(T__1);
 				}
@@ -571,7 +561,7 @@ public class REParser extends Parser {
 		"\2#\"\3\2\2\2$%\3\2\2\2%#\3\2\2\2%&\3\2\2\2&\7\3\2\2\2\'+\5\f\7\2(*\5"+
 		"\n\6\2)(\3\2\2\2*-\3\2\2\2+)\3\2\2\2+,\3\2\2\2,\t\3\2\2\2-+\3\2\2\2./"+
 		"\5\20\t\2/\60\5\f\7\2\60\13\3\2\2\2\61\63\5\16\b\2\62\64\5\22\n\2\63\62"+
-		"\3\2\2\2\63\64\3\2\2\2\64\r\3\2\2\2\65\66\7\3\2\2\66\67\5\6\4\2\678\7"+
+		"\3\2\2\2\63\64\3\2\2\2\64\r\3\2\2\2\65\66\7\3\2\2\66\67\5\2\2\2\678\7"+
 		"\4\2\28;\3\2\2\29;\7\t\2\2:\65\3\2\2\2:9\3\2\2\2;\17\3\2\2\2<=\7\5\2\2"+
 		"=\21\3\2\2\2>?\t\2\2\2?\23\3\2\2\2\b\27 %+\63:";
 	public static final ATN _ATN =

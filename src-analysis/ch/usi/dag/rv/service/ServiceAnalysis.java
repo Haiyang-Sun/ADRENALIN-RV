@@ -4,26 +4,37 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
 
+import android.R.integer;
 import ch.usi.dag.rv.MonitorContext;
 import ch.usi.dag.rv.MonitorEvent;
 import ch.usi.dag.rv.binder.BinderEvent;
+import ch.usi.dag.rv.binder.BinderEvent.BinderType;
+import ch.usi.dag.rv.nfa.DirectedGraph;
 import ch.usi.dag.rv.utils.AndroidRuntime;
 
 public class ServiceAnalysis {
 	public static void process(MonitorContext context,
 			List<MonitorEvent> events) {
-		int index = 0;
+		String involvedProcess = "";
 		for(MonitorEvent event:events){
-			System.out.println("event["+(index++)+"]:"+event.toString());
 			if(event instanceof BinderEvent){
+				BinderEvent be = (BinderEvent) event;
+				if(be.getType()== BinderType.REPLY_RECEIVED.val && be.pid != context.getPid()){
+					involvedProcess = AndroidRuntime.getPName(be.pid);
+				}
 				continue;
 			}
 			String className = (String) event.dynamicInfo[0];
 			String methodName = (String) event.dynamicInfo[1];
 			String pname = AndroidRuntime.getPName(context.getPid());
-			System.out.println("violation detail "+pname+ " "+className +" "+methodName);
-			PerServiceReport.create(pname).newRemoteCall(className, className+"."+methodName);
+			onNewServiceUse(pname, className, methodName, involvedProcess);
 		}
+	}
+	
+	public static void onNewServiceUse(String processName, String serviceName, String serviceMethod, String proxyProcess){
+		if(!proxyProcess.equals(""))
+			System.out.println("Indirect Service Use "+processName+ " "+serviceName +" "+serviceMethod+" via "+proxyProcess);
+		PerServiceReport.create(processName).newRemoteCall(serviceName, serviceName+"."+serviceMethod);
 	}
 	
 	static class Report{

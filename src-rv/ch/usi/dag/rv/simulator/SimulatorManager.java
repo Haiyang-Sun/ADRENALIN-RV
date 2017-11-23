@@ -6,10 +6,10 @@ import java.io.ObjectInputStream;
 import java.util.HashMap;
 
 import ch.usi.dag.rv.MonitorEvent;
-import ch.usi.dag.rv.PropertyProcessorManager;
+import ch.usi.dag.rv.PropertyManager;
 
 public class SimulatorManager {
-	HashMap<Integer, PropertyProcessorManager> realManagers = new HashMap<Integer, PropertyProcessorManager>();
+	HashMap<Integer, PropertyManager> realManagers = new HashMap<Integer, PropertyManager>();
 	EventQueue eventQueue;
 	InputStream inputStream;
 	
@@ -20,7 +20,7 @@ public class SimulatorManager {
 		eventQueue = (EventQueue) objectInputStream.readObject();
 
 		for(Integer pid:eventQueue.pidPname.keySet()){
-			realManagers.put(pid, new PropertyProcessorManager(pid));
+			realManagers.put(pid, new PropertyManager(pid));
 		}
 	}
 	

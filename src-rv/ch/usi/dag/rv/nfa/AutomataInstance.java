@@ -52,18 +52,20 @@ public class AutomataInstance {
 						try {
 							byte[] mel = RVNativeWrapper.getByFlag(be.getToPid(),
 									datFlag);
-							ObjectInputStream ois = new ObjectInputStream(
-									new ByteArrayInputStream(mel));
-	
-							List<MonitorEvent> matchedEventList = (List<MonitorEvent>) ois
-									.readObject();
-							ois.close();
-							for (MonitorEvent monitorEvent : matchedEventList) {
-								AutomataState state = this.transit(monitorEvent,
-										true);
-								if (state == AutomataState.DEAD
-										|| state == AutomataState.END)
-									return state;
+							if(mel != null){
+								ObjectInputStream ois = new ObjectInputStream(
+										new ByteArrayInputStream(mel));
+		
+								List<MonitorEvent> matchedEventList = (List<MonitorEvent>) ois
+										.readObject();
+								ois.close();
+								for (MonitorEvent monitorEvent : matchedEventList) {
+									AutomataState state = this.transit(monitorEvent,
+											true);
+									if (state == AutomataState.DEAD
+											|| state == AutomataState.END)
+										return state;
+								}
 							}
 						} catch (Exception e2) {
 							e2.printStackTrace();

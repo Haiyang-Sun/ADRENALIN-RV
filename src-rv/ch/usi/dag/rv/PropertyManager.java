@@ -13,9 +13,9 @@ import ch.usi.dag.rv.jni.RVNativeWrapper;
 import ch.usi.dag.rv.processing.PropertyRegistry;
 import ch.usi.dag.rv.utils.AndroidRuntime;
 
-public class PropertyProcessorManager {
+public class PropertyManager {
 	int pid;
-	public PropertyProcessorManager(int pid){
+	public PropertyManager(int pid){
 		this.pid = pid;
 		String propertyNames = PropertyRegistry.properties;
 		for(String name: propertyNames.split(",")){
@@ -25,7 +25,7 @@ public class PropertyProcessorManager {
 		}
 	}
 	
-	public static PropertyProcessorManager instance = new PropertyProcessorManager(AndroidRuntime.getPid());
+	public static PropertyManager instance = new PropertyManager(AndroidRuntime.getPid());
 	
 	public ContextManager mcm = new ContextManager(this);
 	

@@ -18,20 +18,26 @@ public class PermissionAnalysis {
 
 	public static void process(MonitorContext context, List<MonitorEvent> events) {
 		int index = 0;
+		String involvedProcess = "";
 		for(MonitorEvent event:events){
-			System.out.println("event["+(index++)+"]:"+event.toString());
+			System.out.println("violation event["+(index++)+"]:"+event.toString());
 			if(event instanceof BinderEvent){
+				BinderEvent be = (BinderEvent) event;
+				if(be.getType()==5 && be.pid != context.getPid()){
+					involvedProcess = AndroidRuntime.getPName(be.pid);
+					System.out.println("involving "+involvedProcess);
+				}
 				continue;
 			}
 			String className = (String) event.dynamicInfo[0];
 			String methodName = (String) event.dynamicInfo[1];
 			String permission = simplifyKey((String) event.dynamicInfo[2]);
 			String pname = AndroidRuntime.getPName(context.getPid());
-			pname = simplifyPname(pname);
+//			pname = simplifyPname(pname);
 			
 			permission = simplifyPermission(permission);
-			System.out.println("violation process "+pname +" uses "+permission);
-			PerServiceReport.create(pname).newRemoteCall("", permission);
+			System.out.println("violation detail "+pname +" uses "+permission+" via "+involvedProcess);
+			PerServiceReport.create(pname).newRemoteCall(involvedProcess, permission);
 			PerServiceReport.create("global").newRemoteCall("", permission);
 		}
 	}

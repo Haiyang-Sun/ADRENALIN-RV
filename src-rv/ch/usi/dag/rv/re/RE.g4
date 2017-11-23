@@ -18,7 +18,7 @@ binaryop : '|';
 
 unaryop : '*' | '+' | '?';
 
-ID  : CHARACTER+;
+ID  : CHARACTER+ | '?'CHARACTER+ ;
 
 
 fragment CHARACTER : [a-zA-Z0-9_.];

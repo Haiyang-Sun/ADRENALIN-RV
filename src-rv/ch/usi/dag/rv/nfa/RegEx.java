@@ -30,6 +30,7 @@ public class RegEx{
 	    //appending the ending binder event of type 3
 	    for(Entry<String, NFA> entry : processName2NFA.entrySet()) {
 	    	String key = entry.getKey();
+	    	System.out.println("entry "+key +" for "+regExp);
 	        if (!key.equalsIgnoreCase("?")){
 	            NFA theNFA = processName2NFA.get(key);
 	            NFA updated = NFA.recognizesBinderEvent(key, 2);

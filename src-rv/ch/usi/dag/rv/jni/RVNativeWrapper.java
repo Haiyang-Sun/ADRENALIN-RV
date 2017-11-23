@@ -50,8 +50,11 @@ public class RVNativeWrapper {
 	
 	public static byte[] getByFlag(int pid, int flag){
 		if(isJVM) {
-//			System.out.println("getting "+flag +" from "+pid);
-			return fakeStore.get(pid).get(flag);
+			//TODO: check why the following can happen 
+			if(fakeStore.containsKey(pid) && fakeStore.get(pid) != null)
+				return fakeStore.get(pid).get(flag);
+			else
+				return null;
 		}else {
 			return RVNative.getByFlag(pid, flag);
 		}

@@ -10,6 +10,6 @@ public class EmptyDiSLClass {
 	        scope = "NOTHING"
 	        )
 	    public static void before_enter (final DexStaticContext dsc) {
-	    	MonitorEvent event = MonitorEvent.newThreadLocalEvent("DataLeak", "MethodEntry", dsc.getDexShortName());
+	    	MonitorEvent event = MonitorEvent.newTLEvent("DataLeak", "MethodEntry", dsc.getDexShortName());
 	    }
 }
